@@ -7,6 +7,7 @@ public class DataManager {
     private final int[] data;
     private final int length;
     private final String name;
+    private final History history = new History();
 
     public DataManager(String name, int dataLength) {
         this.length = dataLength;
@@ -23,6 +24,7 @@ public class DataManager {
 
     public int get(int index, Transaction transaction) {
         System.out.println(transaction.toString() + ": Reading " + get(index) + " from " + index);
+        history.addEvent(transaction, Transaction.Action.READ, index);
         return get(index);
     }
 
@@ -34,6 +36,7 @@ public class DataManager {
 
     public void put(int index, int value, Transaction transaction) {
         System.out.println(transaction.toString() + ": Writing " + value + " to " + index);
+        history.addEvent(transaction, Transaction.Action.WRITE, index);
         put(index, value);
     }
 
@@ -49,6 +52,7 @@ public class DataManager {
         for (int i = 0; i < length; i++) {
             builder.append(String.format("%3d  ", data[i]));
         }
+        builder.append(isSerializable() ? "  (SERIALIZABLE)" : "(NOT SERIALIZABLE)");
         return builder.toString();
     }
 
@@ -66,5 +70,9 @@ public class DataManager {
 
     private boolean isInvalidIndex(int index) {
         return index < 0 || index >= length;
+    }
+
+    public boolean isSerializable() {
+        return history.isSerializable();
     }
 }

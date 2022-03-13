@@ -32,6 +32,7 @@ public class Main {
 
         PrettyPrinter.printResults(ARRAY_LENGTH, transactionList, parallelDataManager, serialDataManager);
 
+
         System.exit(0);
     }
 

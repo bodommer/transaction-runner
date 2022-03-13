@@ -49,6 +49,7 @@ public class Transaction implements Callable<Object> {
                     actualValues.put(index, newValue);
                     break;
                 default:
+                    // commit
             }
         }
         isExpectedArrayComputed = true;
@@ -66,6 +67,7 @@ public class Transaction implements Callable<Object> {
 
     public enum Action {
         READ,
-        WRITE
+        WRITE,
+        COMMIT
     }
 }

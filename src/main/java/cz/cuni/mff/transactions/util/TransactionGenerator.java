@@ -26,15 +26,20 @@ public class TransactionGenerator {
         for (int i = 0; i < transactionLength; i++) {
             int index = random.nextInt(arrayLength);
             actionIndexes.add(index);
-            if (Boolean.TRUE.equals(isRead[index])) {
-                if (random.nextBoolean()) {
-                    actions.add(Transaction.Action.WRITE);
+            // decide whether create a commit operation or a read/write (2% change of commit action)
+            if (random.nextInt(50) == 0) {
+                actions.add(Transaction.Action.COMMIT);
+            } else {
+                if (Boolean.TRUE.equals(isRead[index])) {
+                    if (random.nextBoolean()) {
+                        actions.add(Transaction.Action.WRITE);
+                    } else {
+                        actions.add(Transaction.Action.READ);
+                    }
                 } else {
+                    isRead[index] = true;
                     actions.add(Transaction.Action.READ);
                 }
-            } else {
-                isRead[index] = true;
-                actions.add(Transaction.Action.READ);
             }
         }
         return new Transaction(TRANSACTION_CODE + generatedTransactions++, arrayLength, actions, actionIndexes);
