@@ -21,6 +21,10 @@ public class History {
         return SerializabilityEvaluator.isSerializable(transactions, events);
     }
 
+    public boolean isRecoverable() {
+        return RecoverabilityEvaluator.isRecoverable(transactions, events);
+    }
+
     public void printHistory() {
         for (HistoryEvent event : events) {
             System.out.println(event.transaction.toString().substring(2) + " " + getActionCode(event.action) + " "

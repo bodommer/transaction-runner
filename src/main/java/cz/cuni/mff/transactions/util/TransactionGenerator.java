@@ -30,8 +30,9 @@ public class TransactionGenerator {
         for (int i = 0; i < transactionLength; i++) {
             int index = random.nextInt(arrayLength);
             actionIndexes.add(index);
-            // decide whether create a commit operation or a read/write (2% change of commit action)
-            if (random.nextInt(50) == 0) {
+            // decide whether create a commit operation or a read/write (3.33% change of commit action)
+            // or: every transaction's last operation must be a commit
+            if (random.nextInt(30) == 0 || i == transactionLength - 1) {
                 actions.add(Transaction.Action.COMMIT);
             } else {
                 if (Boolean.TRUE.equals(isRead[index])) {

@@ -44,7 +44,7 @@ public class Transaction implements Callable<Object> {
                     performWrite(index);
                     break;
                 default:
-                    // commit
+                    connection.commit(this);
             }
         }
         isExpectedArrayComputed = true;

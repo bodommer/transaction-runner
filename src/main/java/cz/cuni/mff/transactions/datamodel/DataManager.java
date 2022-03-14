@@ -40,6 +40,10 @@ public class DataManager {
         put(index, value);
     }
 
+    public void commit(Transaction transaction) {
+        history.addEvent(transaction, Transaction.Action.COMMIT, 0);
+    }
+
     @SuppressWarnings("unused")
     public int getLength() {
         return length;
@@ -52,7 +56,8 @@ public class DataManager {
         for (int i = 0; i < length; i++) {
             builder.append(String.format("%3d  ", data[i]));
         }
-        builder.append(isSerializable() ? "  (SERIALIZABLE)" : "(NOT SERIALIZABLE)");
+        builder.append(isSerializable() ? "  (SERIALIZABLE, " : "(NOT SERIALIZABLE, ");
+        builder.append(isRecoverable() ? "RECOVERABLE)" : "IRRECOVERABLE)");
         return builder.toString();
     }
 
@@ -60,6 +65,11 @@ public class DataManager {
         return history.isSerializable();
     }
 
+    public boolean isRecoverable() {
+        return history.isRecoverable();
+    }
+
+    @SuppressWarnings("unused")
     public void printHistory() {
         history.printHistory();
     }

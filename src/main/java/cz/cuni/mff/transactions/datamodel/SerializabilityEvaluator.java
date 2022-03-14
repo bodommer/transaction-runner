@@ -57,7 +57,7 @@ public class SerializabilityEvaluator {
                     continue;
                 }
                 if (eventOne.getTransaction() != eventTwo.getTransaction()
-                        && !(isRead(eventOne.getAction()) && isRead(eventTwo.getAction()))
+                        && !(isReadAction(eventOne.getAction()) && isReadAction(eventTwo.getAction()))
                         && eventOne.getIndex() == eventTwo.getIndex()) {
                     incidenceMatrix[transactionMap.get(eventTwo.getTransaction())][transactionMap.get(eventOne.getTransaction())] =
                             getType(eventOne, eventTwo);
@@ -99,7 +99,7 @@ public class SerializabilityEvaluator {
         return true;
     }
 
-    private static boolean isRead(Transaction.Action action) {
+    private static boolean isReadAction(Transaction.Action action) {
         return action == Transaction.Action.READ;
     }
 
