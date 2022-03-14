@@ -10,11 +10,11 @@ import java.util.concurrent.Callable;
 public class Transaction implements Callable<Object> {
 
     private final String name;
-    private DataManager connection;
     private final List<Action> actions;
     private final List<Integer> actionIndex;
     private final int[] checkArray;
     private final Map<Integer, Integer> actualValues = new HashMap<>();
+    private DataManager connection;
     private boolean isExpectedArrayComputed = false;
 
     public Transaction(String name, int arrayLength, List<Action> actions, List<Integer> actionIndex) {
@@ -41,12 +41,7 @@ public class Transaction implements Callable<Object> {
                     actualValues.put(index, connection.get(index, this));
                     break;
                 case WRITE:
-                    if (!isExpectedArrayComputed) {
-                        checkArray[index]++;
-                    }
-                    int newValue = actualValues.getOrDefault(index, 0) + 1;
-                    connection.put(index, newValue, this);
-                    actualValues.put(index, newValue);
+                    performWrite(index);
                     break;
                 default:
                     // commit
@@ -63,6 +58,17 @@ public class Transaction implements Callable<Object> {
     @Override
     public String toString() {
         return name;
+    }
+
+    private void performWrite(int index) {
+        int currentValue = actualValues.getOrDefault(index, 0);
+        int addition = currentValue % 2 == 0 ? 1 : 3;
+        if (!isExpectedArrayComputed) {
+            checkArray[index] = checkArray[index] + addition;
+        }
+        int newValue = currentValue + addition;
+        connection.put(index, newValue, this);
+        actualValues.put(index, newValue);
     }
 
     public enum Action {

@@ -14,6 +14,10 @@ public class TransactionGenerator {
 
     private static int generatedTransactions = 1;
 
+    private TransactionGenerator() {
+        // NOP
+    }
+
     public static void defineRandom(int seed) {
         random = new Random(seed);
     }
@@ -43,9 +47,5 @@ public class TransactionGenerator {
             }
         }
         return new Transaction(TRANSACTION_CODE + generatedTransactions++, arrayLength, actions, actionIndexes);
-    }
-
-    private TransactionGenerator() {
-        // NOP
     }
 }

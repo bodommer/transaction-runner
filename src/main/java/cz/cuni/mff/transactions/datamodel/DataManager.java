@@ -56,6 +56,14 @@ public class DataManager {
         return builder.toString();
     }
 
+    public boolean isSerializable() {
+        return history.isSerializable();
+    }
+
+    public void printHistory() {
+        history.printHistory();
+    }
+
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
@@ -70,9 +78,5 @@ public class DataManager {
 
     private boolean isInvalidIndex(int index) {
         return index < 0 || index >= length;
-    }
-
-    public boolean isSerializable() {
-        return history.isSerializable();
     }
 }

@@ -7,6 +7,10 @@ import java.util.Collection;
 
 public class PrettyPrinter {
 
+    private PrettyPrinter() {
+        // NOP
+    }
+
     public static void printResults(int arrayLength, Collection<Transaction> transactions, DataManager... results) {
         System.out.println("-".repeat(10 + 5 * arrayLength));
         System.out.println("RESULTS:");
@@ -27,9 +31,5 @@ public class PrettyPrinter {
             }
             System.out.println();
         }
-    }
-
-    private PrettyPrinter() {
-        // NOP
     }
 }
