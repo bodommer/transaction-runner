@@ -11,10 +11,14 @@ import java.util.concurrent.TimeUnit;
 public enum TransactionRunner implements IRunner {
     SERIAL {
         @Override
-        public void run(Collection<ITransaction> transactions, DataManager dataManager) throws Exception {
-            for (ITransaction transaction : transactions) {
-                transaction.setConnection(dataManager);
-                transaction.call();
+        public void run(Collection<ITransaction> transactions, DataManager dataManager) {
+            try {
+                for (ITransaction transaction : transactions) {
+                    transaction.setConnection(dataManager);
+                    transaction.call();
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
     },
@@ -28,7 +32,6 @@ public enum TransactionRunner implements IRunner {
                 ExecutorService service = Executors.newFixedThreadPool(transactions.size());
                 service.invokeAll(transactions, 10, TimeUnit.SECONDS);
             } catch (IllegalStateException | InterruptedException e) {
-                System.out.println("ERROR");
                 transactions.forEach(ITransaction::reset);
                 e.printStackTrace();
             }

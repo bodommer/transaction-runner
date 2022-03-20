@@ -6,5 +6,5 @@ import cz.cuni.mff.transactions.model.ITransaction;
 import java.util.Collection;
 
 public interface IRunner {
-    void run(Collection<ITransaction> transactions, DataManager dataManager) throws Exception;
+    void run(Collection<ITransaction> transactions, DataManager dataManager);
 }

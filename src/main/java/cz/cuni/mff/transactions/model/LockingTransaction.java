@@ -50,7 +50,6 @@ public class LockingTransaction extends AbstractTransaction {
                 return;
             } else {
                 try {
-                    System.out.println(toString() + " Sleep");
                     Thread.sleep(SLEEP_DURATION);
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
