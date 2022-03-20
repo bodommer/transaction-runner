@@ -1,8 +1,10 @@
 package cz.cuni.mff.transactions.datamodel;
 
-import cz.cuni.mff.transactions.model.Transaction;
+import cz.cuni.mff.transactions.model.ITransaction;
+import cz.cuni.mff.transactions.model.TransactionAction;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class SerializabilityEvaluator {
 
@@ -10,34 +12,30 @@ public class SerializabilityEvaluator {
         // NOP
     }
 
-    public static boolean isSerializable(Set<Transaction> transactions, List<History.HistoryEvent> events) {
+    public static boolean isSerializable(Set<ITransaction> transactions, List<History.HistoryEvent> events) {
         // 1. Trivial case
         if (transactions.size() < 2) {
             return true;
         }
 
         // 2. Transaction to index in incidence matrix
-        Map<Transaction, Integer> transactionMap = createTransactionMap(transactions);
+        Map<ITransaction, Integer> transactionMap = createTransactionMap(transactions);
 
         // 3. Find conflicts: RW WR WW
         History.ConflictType[][] incidenceMatrix = detectConflicts(transactions, events, transactionMap);
 
-        // 4. Find starting points for DFS
-        List<Integer> emptyRows = getEmptyRows(transactions, incidenceMatrix);
+        // 4. Start in all nodes
+        // TODO: improve for large graphs
+        List<Integer> rowIndexes = transactions.stream().map(tr -> tr.getId() - 1).collect(Collectors.toList());
 
-        // 5. No starting points = all transactions are in loops
-        if (emptyRows.isEmpty()) {
-            return false;
-        }
-
-        // 6. Check for inner loops
-        return runDFS(emptyRows, transactions, incidenceMatrix);
+        // 5. Check for inner loops
+        return runDFS(rowIndexes, transactions, incidenceMatrix);
 
     }
 
-    private static Map<Transaction, Integer> createTransactionMap(Set<Transaction> transactions) {
+    private static Map<ITransaction, Integer> createTransactionMap(Set<ITransaction> transactions) {
         int index = 0;
-        Map<Transaction, Integer> map = new HashMap<>();
+        Map<ITransaction, Integer> map = new HashMap<>();
         for (var transaction : transactions) {
             map.put(transaction, index);
             index++;
@@ -45,15 +43,15 @@ public class SerializabilityEvaluator {
         return map;
     }
 
-    private static History.ConflictType[][] detectConflicts(Set<Transaction> transactions,
-                                                            List<History.HistoryEvent> events, Map<Transaction,
+    private static History.ConflictType[][] detectConflicts(Set<ITransaction> transactions,
+                                                            List<History.HistoryEvent> events, Map<ITransaction,
             Integer> transactionMap) {
         History.ConflictType[][] incidenceMatrix = new History.ConflictType[transactions.size()][transactions.size()];
         for (int i = 0; i < events.size(); i++) {
             for (int j = i + 1; j < events.size(); j++) {
                 History.HistoryEvent eventOne = events.get(i);
                 History.HistoryEvent eventTwo = events.get(j);
-                if (eventOne.getAction() == Transaction.Action.COMMIT || eventTwo.getAction() == Transaction.Action.COMMIT) {
+                if (eventOne.getAction() == TransactionAction.COMMIT || eventTwo.getAction() == TransactionAction.COMMIT) {
                     continue;
                 }
                 if (eventOne.getTransaction() != eventTwo.getTransaction()
@@ -67,19 +65,8 @@ public class SerializabilityEvaluator {
         return incidenceMatrix;
     }
 
-    private static List<Integer> getEmptyRows(Set<Transaction> transactions,
-                                              History.ConflictType[][] incidenceMatrix) {
-        List<Integer> emptyRows = new ArrayList<>();
-        for (int i = 0; i < transactions.size(); i++) {
-            if (Arrays.stream(incidenceMatrix[i]).allMatch(Objects::isNull)) {
-                emptyRows.add(i);
-            }
-        }
-        return emptyRows;
-    }
-
     @SuppressWarnings("squid:S3776") // doesn't make sense to reduce complexity
-    private static boolean runDFS(List<Integer> emptyRows, Set<Transaction> transactions,
+    private static boolean runDFS(List<Integer> emptyRows, Set<ITransaction> transactions,
                                   History.ConflictType[][] incidenceMatrix) {
         for (int start : emptyRows) {
             Deque<Path> stack = new ArrayDeque<>();
@@ -99,14 +86,14 @@ public class SerializabilityEvaluator {
         return true;
     }
 
-    private static boolean isReadAction(Transaction.Action action) {
-        return action == Transaction.Action.READ;
+    private static boolean isReadAction(TransactionAction action) {
+        return action == TransactionAction.READ;
     }
 
     private static History.ConflictType getType(History.HistoryEvent event1, History.HistoryEvent event2) {
-        if (event1.getAction() == Transaction.Action.READ) {
+        if (event1.getAction() == TransactionAction.READ) {
             return History.ConflictType.RW;
-        } else if (event2.getAction() == Transaction.Action.WRITE) {
+        } else if (event2.getAction() == TransactionAction.WRITE) {
             return History.ConflictType.WW;
         }
         return History.ConflictType.WR;

@@ -1,6 +1,6 @@
 package cz.cuni.mff.transactions.util;
 
-import cz.cuni.mff.transactions.model.Transaction;
+import cz.cuni.mff.transactions.model.ITransaction;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,17 +11,17 @@ public class PermutationGenerator {
         // NOP
     }
 
-    public static void generatePermutations(List<List<Transaction>> result,
-                                            List<Transaction> transactions,
+    public static void generatePermutations(List<List<ITransaction>> result,
+                                            List<ITransaction> transactions,
                                             int permutationSize,
-                                            List<Transaction> permutation) {
+                                            List<ITransaction> permutation) {
         if (permutation == null) {
             if (!(permutationSize > 0 && permutationSize <= transactions.size())) {
                 throw new IllegalArgumentException();
             }
             permutation = new ArrayList<>(permutationSize);
         }
-        for (Transaction i : transactions) {
+        for (ITransaction i : transactions) {
             if (permutation.contains(i)) {
                 continue;
             }
@@ -36,10 +36,10 @@ public class PermutationGenerator {
         }
     }
 
-    public static String getRunName(List<Transaction> transactions) {
+    public static String getRunName(List<ITransaction> transactions) {
         StringBuilder builder = new StringBuilder();
         boolean first = true;
-        for (Transaction t : transactions) {
+        for (ITransaction t : transactions) {
             if (first) {
                 first = false;
             } else {

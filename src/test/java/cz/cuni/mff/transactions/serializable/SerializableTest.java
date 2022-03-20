@@ -1,7 +1,8 @@
 package cz.cuni.mff.transactions.serializable;
 
 import cz.cuni.mff.transactions.datamodel.History;
-import cz.cuni.mff.transactions.model.Transaction;
+import cz.cuni.mff.transactions.model.BasicTransaction;
+import cz.cuni.mff.transactions.model.TransactionAction;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
@@ -17,8 +18,10 @@ import static org.mockito.Mockito.when;
 
 class SerializableTest {
 
+    //formatter:off
     @ParameterizedTest
-    @CsvSource({"three_short_transactions, 3, false",
+    @CsvSource({
+            "three_short_transactions, 3, false",
             "input_1, 3, true",
             "input_2, 3, true",
             "input_3, 3, true",
@@ -87,14 +90,16 @@ class SerializableTest {
             "input_66, 3, true",
             "input_67, 3, true",
             "input_68, 3, true"})
+    //formatter:on
     void serializableTest(String fileName, int transactionCount, boolean expected) throws IOException {
         // prepare
         History history = new History();
 
-        List<Transaction> transactions = new ArrayList<>();
+        List<BasicTransaction> transactions = new ArrayList<>();
         for (int i = 1; i < transactionCount + 1; i++) {
-            Transaction transaction = mock(Transaction.class);
+            BasicTransaction transaction = mock(BasicTransaction.class);
             when(transaction.toString()).thenReturn("TR" + i);
+            when(transaction.getId()).thenReturn(i);
             transactions.add(transaction);
         }
 
@@ -103,17 +108,17 @@ class SerializableTest {
                              fileName)))) {
             for (String line; (line = reader.readLine()) != null; ) {
                 String[] elements = line.split(" ");
-                Transaction transaction = transactions.get(Integer.parseInt(elements[0]) - 1);
-                Transaction.Action action;
+                BasicTransaction transaction = transactions.get(Integer.parseInt(elements[0]) - 1);
+                TransactionAction action;
                 switch (elements[1]) {
                     case "W":
-                        action = Transaction.Action.WRITE;
+                        action = TransactionAction.WRITE;
                         break;
                     case "R":
-                        action = Transaction.Action.READ;
+                        action = TransactionAction.READ;
                         break;
                     default:
-                        action = Transaction.Action.COMMIT;
+                        action = TransactionAction.COMMIT;
                 }
                 int index = Integer.parseInt(elements[2]);
                 history.addEvent(transaction, action, index);
@@ -122,6 +127,7 @@ class SerializableTest {
 
         // act
         boolean isSerializable = history.isSerializable();
+        history.printHistoryInLanes();
 
         //assert
         assertEquals(expected, isSerializable);

@@ -1,7 +1,7 @@
 package cz.cuni.mff.transactions.runner;
 
 import cz.cuni.mff.transactions.datamodel.DataManager;
-import cz.cuni.mff.transactions.model.Transaction;
+import cz.cuni.mff.transactions.model.ITransaction;
 
 import java.util.Collection;
 import java.util.concurrent.ExecutorService;
@@ -11,8 +11,8 @@ import java.util.concurrent.TimeUnit;
 public enum TransactionRunner implements IRunner {
     SERIAL {
         @Override
-        public void run(Collection<Transaction> transactions, DataManager dataManager) {
-            for (Transaction transaction : transactions) {
+        public void run(Collection<ITransaction> transactions, DataManager dataManager) throws Exception {
+            for (ITransaction transaction : transactions) {
                 transaction.setConnection(dataManager);
                 transaction.call();
             }
@@ -22,12 +22,14 @@ public enum TransactionRunner implements IRunner {
     PARALLEL {
         @Override
         @SuppressWarnings("squid:S2142") // handle interrupted exception
-        public void run(Collection<Transaction> transactions, DataManager dataManager) {
+        public void run(Collection<ITransaction> transactions, DataManager dataManager) {
             transactions.forEach(transaction -> transaction.setConnection(dataManager));
             try {
                 ExecutorService service = Executors.newFixedThreadPool(transactions.size());
                 service.invokeAll(transactions, 10, TimeUnit.SECONDS);
-            } catch (InterruptedException e) {
+            } catch (IllegalStateException | InterruptedException e) {
+                System.out.println("ERROR");
+                transactions.forEach(ITransaction::reset);
                 e.printStackTrace();
             }
         }

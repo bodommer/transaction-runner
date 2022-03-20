@@ -1,6 +1,7 @@
 package cz.cuni.mff.transactions.datamodel;
 
-import cz.cuni.mff.transactions.model.Transaction;
+import cz.cuni.mff.transactions.model.ITransaction;
+import cz.cuni.mff.transactions.model.TransactionAction;
 
 public class DataManager {
 
@@ -8,11 +9,13 @@ public class DataManager {
     private final int length;
     private final String name;
     private final History history = new History();
+    private final LockManager lockManager;
 
     public DataManager(String name, int dataLength) {
         this.length = dataLength;
         data = new int[dataLength];
         this.name = name;
+        this.lockManager = new LockManager(dataLength);
     }
 
     public int get(int index) {
@@ -22,9 +25,9 @@ public class DataManager {
         return data[index];
     }
 
-    public int get(int index, Transaction transaction) {
+    public int get(int index, ITransaction transaction) {
         System.out.println(transaction.toString() + ": Reading " + get(index) + " from " + index);
-        history.addEvent(transaction, Transaction.Action.READ, index);
+        history.addEvent(transaction, TransactionAction.READ, index);
         return get(index);
     }
 
@@ -34,14 +37,14 @@ public class DataManager {
         }
     }
 
-    public void put(int index, int value, Transaction transaction) {
+    public void put(int index, int value, ITransaction transaction) {
         System.out.println(transaction.toString() + ": Writing " + value + " to " + index);
-        history.addEvent(transaction, Transaction.Action.WRITE, index);
+        history.addEvent(transaction, TransactionAction.WRITE, index);
         put(index, value);
     }
 
-    public void commit(Transaction transaction) {
-        history.addEvent(transaction, Transaction.Action.COMMIT, 0);
+    public void commit(ITransaction transaction) {
+        history.addEvent(transaction, TransactionAction.COMMIT, 0);
     }
 
     @SuppressWarnings("unused")
@@ -67,6 +70,10 @@ public class DataManager {
 
     public boolean isRecoverable() {
         return history.isRecoverable();
+    }
+
+    public LockManager getLockManager() {
+        return lockManager;
     }
 
     @SuppressWarnings("unused")

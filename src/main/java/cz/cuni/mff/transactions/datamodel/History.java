@@ -1,6 +1,7 @@
 package cz.cuni.mff.transactions.datamodel;
 
-import cz.cuni.mff.transactions.model.Transaction;
+import cz.cuni.mff.transactions.model.ITransaction;
+import cz.cuni.mff.transactions.model.TransactionAction;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -10,9 +11,9 @@ import java.util.Set;
 public class History {
 
     private final List<HistoryEvent> events = new ArrayList<>();
-    private final Set<Transaction> transactions = new HashSet<>();
+    private final Set<ITransaction> transactions = new HashSet<>();
 
-    public void addEvent(Transaction transaction, Transaction.Action action, int index) {
+    public void addEvent(ITransaction transaction, TransactionAction action, int index) {
         transactions.add(transaction);
         events.add(new HistoryEvent(action, index, transaction));
     }
@@ -32,7 +33,15 @@ public class History {
         }
     }
 
-    private static String getActionCode(Transaction.Action action) {
+    public void printHistoryInLanes() {
+        for (HistoryEvent event : events) {
+            int transactionId = event.getTransaction().getId();
+            System.out.println(" ".repeat(7 * (transactionId - 1)) + getActionCode(event.getAction()) + transactionId
+                    + (event.getAction() == TransactionAction.COMMIT ? "" : " X" + event.getIndex()));
+        }
+    }
+
+    private static String getActionCode(TransactionAction action) {
         switch (action) {
             case READ:
                 return "R";
@@ -50,17 +59,17 @@ public class History {
     }
 
     public static class HistoryEvent {
-        private final Transaction.Action action;
+        private final TransactionAction action;
         private final int index;
-        private final Transaction transaction;
+        private final ITransaction transaction;
 
-        private HistoryEvent(Transaction.Action action, int index, Transaction transaction) {
+        private HistoryEvent(TransactionAction action, int index, ITransaction transaction) {
             this.action = action;
             this.index = index;
             this.transaction = transaction;
         }
 
-        public Transaction.Action getAction() {
+        public TransactionAction getAction() {
             return action;
         }
 
@@ -68,7 +77,7 @@ public class History {
             return index;
         }
 
-        public Transaction getTransaction() {
+        public ITransaction getTransaction() {
             return transaction;
         }
     }

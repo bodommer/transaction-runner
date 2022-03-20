@@ -1,7 +1,7 @@
 package cz.cuni.mff.transactions.util;
 
 import cz.cuni.mff.transactions.datamodel.DataManager;
-import cz.cuni.mff.transactions.model.Transaction;
+import cz.cuni.mff.transactions.model.ITransaction;
 
 import java.util.Collection;
 
@@ -11,7 +11,7 @@ public class PrettyPrinter {
         // NOP
     }
 
-    public static void printResults(int arrayLength, Collection<Transaction> transactions, DataManager... results) {
+    public static void printResults(int arrayLength, Collection<ITransaction> transactions, DataManager... results) {
         System.out.println("-".repeat(10 + 5 * arrayLength));
         System.out.println("RESULTS:");
 
@@ -22,7 +22,7 @@ public class PrettyPrinter {
         System.out.println("-".repeat(10 + 5 * arrayLength));
         System.out.println("TRANSACTION SUMMARY:");
 
-        for (Transaction transaction : transactions) {
+        for (ITransaction transaction : transactions) {
             System.out.print(transaction.toString());
             int[] arr = transaction.getExpectedArray();
             System.out.print(" ".repeat(12 - transaction.toString().length()));

@@ -1,32 +1,28 @@
 package cz.cuni.mff.transactions.datamodel;
 
-import cz.cuni.mff.transactions.model.Transaction;
+import cz.cuni.mff.transactions.model.ITransaction;
+import cz.cuni.mff.transactions.model.TransactionAction;
 
 import java.util.*;
 
 public class RecoverabilityEvaluator {
 
-    public static boolean isRecoverable(Set<Transaction> transactions, List<History.HistoryEvent> events) {
-        // serializable schedules are recoverable
-        if (SerializabilityEvaluator.isSerializable(transactions, events)) {
-            return true;
-        }
-
+    public static boolean isRecoverable(Set<ITransaction> transactions, List<History.HistoryEvent> events) {
         // 1. Trivial case
         if (transactions.size() < 2) {
             return true;
         }
 
         // 2. Transaction to index in incidence matrix
-        Map<Transaction, Integer> transactionMap = createTransactionMap(transactions);
+        Map<ITransaction, Integer> transactionMap = createTransactionMap(transactions);
 
         // 3. Find conflicts: RW WR WW
         return detectConflicts(events, transactionMap);
     }
 
-    private static Map<Transaction, Integer> createTransactionMap(Set<Transaction> transactions) {
+    private static Map<ITransaction, Integer> createTransactionMap(Set<ITransaction> transactions) {
         int index = 0;
-        Map<Transaction, Integer> map = new HashMap<>();
+        Map<ITransaction, Integer> map = new HashMap<>();
         for (var transaction : transactions) {
             map.put(transaction, index);
             index++;
@@ -36,14 +32,14 @@ public class RecoverabilityEvaluator {
 
     @SuppressWarnings("squid:S3776") // doesn't make sense to reduce complexity
     private static boolean detectConflicts(List<History.HistoryEvent> events,
-                                           Map<Transaction, Integer> transactionMap) {
+                                           Map<ITransaction, Integer> transactionMap) {
         Map<Integer, Set<DirtyRead>> goodCommits = new HashMap<>();
         Map<Integer, Set<DirtyRead>> errorCommits = new HashMap<>();
 
         for (int i = 0; i < events.size(); i++) {
             History.HistoryEvent eventOne = events.get(i);
             int transactionOneId = transactionMap.get(eventOne.getTransaction());
-            if (eventOne.getAction() == Transaction.Action.COMMIT) {
+            if (eventOne.getAction() == TransactionAction.COMMIT) {
                 if (errorCommits.getOrDefault(transactionOneId, new HashSet<>()).isEmpty()) {
                     // correct commit order
                     // remove all 'errorCommit' instances from the other map
@@ -64,7 +60,7 @@ public class RecoverabilityEvaluator {
                 // dirty read
                 if (eventOne.getTransaction() != eventTwo.getTransaction()
                         && eventOne.getIndex() == eventTwo.getIndex()
-                        && (eventOne.getAction() == Transaction.Action.WRITE && eventTwo.getAction() == Transaction.Action.READ)) {
+                        && (eventOne.getAction() == TransactionAction.WRITE && eventTwo.getAction() == TransactionAction.READ)) {
                     // create a new dirty read
                     DirtyRead dirtyRead = new DirtyRead(transactionOneId,
                             transactionMap.get(eventTwo.getTransaction()));
