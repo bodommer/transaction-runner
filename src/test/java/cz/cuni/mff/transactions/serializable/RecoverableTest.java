@@ -1,8 +1,8 @@
 package cz.cuni.mff.transactions.serializable;
 
-import cz.cuni.mff.transactions.datamodel.History;
-import cz.cuni.mff.transactions.model.BasicTransaction;
-import cz.cuni.mff.transactions.model.TransactionAction;
+import cz.cuni.mff.transactions.datamodel.manager.LogManager;
+import cz.cuni.mff.transactions.datamodel.TransactionAction;
+import cz.cuni.mff.transactions.transaction.Transaction;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
@@ -93,11 +93,11 @@ class RecoverableTest {
     //formatter:on
     void serializableTest(String fileName, int transactionCount, boolean expected) throws IOException {
         // prepare
-        History history = new History();
+        LogManager history = new LogManager();
 
-        List<BasicTransaction> transactions = new ArrayList<>();
+        List<Transaction> transactions = new ArrayList<>();
         for (int i = 1; i < transactionCount + 1; i++) {
-            BasicTransaction transaction = mock(BasicTransaction.class);
+            Transaction transaction = mock(Transaction.class);
             when(transaction.toString()).thenReturn("TR" + i);
             when(transaction.getId()).thenReturn(i);
             transactions.add(transaction);
@@ -108,7 +108,7 @@ class RecoverableTest {
                              fileName)))) {
             for (String line; (line = reader.readLine()) != null; ) {
                 String[] elements = line.split(" ");
-                BasicTransaction transaction = transactions.get(Integer.parseInt(elements[0]) - 1);
+                Transaction transaction = transactions.get(Integer.parseInt(elements[0]) - 1);
                 TransactionAction action;
                 switch (elements[1]) {
                     case "W":

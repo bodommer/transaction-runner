@@ -1,9 +1,10 @@
-package cz.cuni.mff.transactions.datamodel;
+package cz.cuni.mff.transactions.datamodel.manager;
 
-import cz.cuni.mff.transactions.model.ITransaction;
+import cz.cuni.mff.transactions.transaction.ITransaction;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class LockManager {
 
@@ -69,6 +70,11 @@ public class LockManager {
         sharedLocks.get(index).remove(transaction);
     }
 
+    public void releaseAllLocks(ITransaction transaction) {
+        exclusiveLocks.replaceAll(tr -> tr.equals(transaction) ? null : tr);
+        sharedLocks.forEach(li -> li.remove(transaction));
+    } 
+    
     public boolean canWrite(int index, ITransaction transaction) {
         return !outOfRange(index) && exclusiveLocks.get(index) == transaction;
     }

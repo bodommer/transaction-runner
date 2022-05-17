@@ -1,6 +1,6 @@
 package cz.cuni.mff.transactions.util;
 
-import cz.cuni.mff.transactions.model.ITransaction;
+import cz.cuni.mff.transactions.transaction.ITransaction;
 
 import java.util.ArrayList;
 import java.util.List;

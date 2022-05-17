@@ -1,13 +1,14 @@
-package cz.cuni.mff.transactions.datamodel;
+package cz.cuni.mff.transactions.datamodel.evaluator;
 
-import cz.cuni.mff.transactions.model.ITransaction;
-import cz.cuni.mff.transactions.model.TransactionAction;
+import cz.cuni.mff.transactions.datamodel.structure.HistoryEvent;
+import cz.cuni.mff.transactions.transaction.ITransaction;
+import cz.cuni.mff.transactions.datamodel.TransactionAction;
 
 import java.util.*;
 
 public class RecoverabilityEvaluator {
 
-    public static boolean isRecoverable(Set<ITransaction> transactions, List<History.HistoryEvent> events) {
+    public static boolean isRecoverable(Set<ITransaction> transactions, List<HistoryEvent> events) {
         // 1. Trivial case
         if (transactions.size() < 2) {
             return true;
@@ -31,13 +32,13 @@ public class RecoverabilityEvaluator {
     }
 
     @SuppressWarnings("squid:S3776") // doesn't make sense to reduce complexity
-    private static boolean detectConflicts(List<History.HistoryEvent> events,
+    private static boolean detectConflicts(List<HistoryEvent> events,
                                            Map<ITransaction, Integer> transactionMap) {
         Map<Integer, Set<DirtyRead>> goodCommits = new HashMap<>();
         Map<Integer, Set<DirtyRead>> errorCommits = new HashMap<>();
 
         for (int i = 0; i < events.size(); i++) {
-            History.HistoryEvent eventOne = events.get(i);
+            HistoryEvent eventOne = events.get(i);
             int transactionOneId = transactionMap.get(eventOne.getTransaction());
             if (eventOne.getAction() == TransactionAction.COMMIT) {
                 if (errorCommits.getOrDefault(transactionOneId, new HashSet<>()).isEmpty()) {
@@ -55,7 +56,7 @@ public class RecoverabilityEvaluator {
                 continue;
             }
             for (int j = i + 1; j < events.size(); j++) {
-                History.HistoryEvent eventTwo = events.get(j);
+                HistoryEvent eventTwo = events.get(j);
 
                 // dirty read
                 if (eventOne.getTransaction() != eventTwo.getTransaction()

@@ -1,9 +1,9 @@
 package cz.cuni.mff.transactions;
 
-import cz.cuni.mff.transactions.datamodel.DataManager;
-import cz.cuni.mff.transactions.model.AbstractTransaction;
-import cz.cuni.mff.transactions.model.ITransaction;
-import cz.cuni.mff.transactions.runner.TransactionRunner;
+import cz.cuni.mff.transactions.datamodel.Engine;
+import cz.cuni.mff.transactions.datamodel.manager.DatabaseManager;
+import cz.cuni.mff.transactions.transaction.Transaction;
+import cz.cuni.mff.transactions.transaction.ITransaction;
 import cz.cuni.mff.transactions.util.PermutationGenerator;
 import cz.cuni.mff.transactions.util.PrettyPrinter;
 import cz.cuni.mff.transactions.util.TransactionGenerator;
@@ -13,11 +13,11 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-public class TransactionEngine {
+public class TransactionBroker {
 
-    public static <T extends AbstractTransaction> void run(Class<T> targetType, int transactionCount,
-                                                           int arrayLength,
-                                                           int transactionLength) throws Exception {
+    public static <T extends Transaction> void run(Class<T> targetType, int transactionCount,
+                                                   int arrayLength,
+                                                   int transactionLength) throws Exception {
         TransactionGenerator.defineRandom(123);
 
         List<ITransaction> transactionList = new ArrayList<>();
@@ -26,28 +26,27 @@ public class TransactionEngine {
         }
         transactionList = transactionList.stream().filter(Objects::nonNull).collect(Collectors.toList());
 
-        DataManager parallelDataManager = new DataManager("PARALLEL", arrayLength);
-        TransactionRunner.PARALLEL.run(transactionList, parallelDataManager);
+        Engine engine = new Engine("PARALLEL", arrayLength, TransactionRunner.PSEUDO_PARALLEL);
 
         List<List<ITransaction>> transactionPermutations = new ArrayList<>();
         PermutationGenerator.generatePermutations(transactionPermutations, transactionList, transactionList.size(),
                 null);
 
-        DataManager[] dataManagers = new DataManager[1 + transactionPermutations.size()];
+        DatabaseManager[] dataManagers = new DatabaseManager[1 + transactionPermutations.size()];
         dataManagers[0] = parallelDataManager;
 
         for (int i = 0; i < transactionPermutations.size(); i++) {
             List<ITransaction> transactions = transactionPermutations.get(i);
-            DataManager dataManager = new DataManager("SERIAL " + PermutationGenerator.getRunName(transactions),
+            DatabaseManager dataManager = new DatabaseManager("SERIAL " + PermutationGenerator.getRunName(transactions),
                     arrayLength);
-            TransactionRunner.SERIAL.run(transactions, dataManager);
+            engine.run();
             dataManagers[i + 1] = dataManager;
         }
 
         PrettyPrinter.printResults(arrayLength, transactionList, dataManagers);
     }
 
-    private TransactionEngine() {
+    private TransactionBroker() {
         // NOP
     }
 }
