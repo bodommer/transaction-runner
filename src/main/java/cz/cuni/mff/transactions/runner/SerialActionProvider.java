@@ -19,8 +19,9 @@ public class SerialActionProvider extends AbstractActionProvider {
         while (currentTransaction < transactionCount) {
             if (transactions.get(currentTransaction).hasNext()) {
                 return transactions.get(currentTransaction);
+            } else {
+                currentTransaction++;
             }
-            currentTransaction++;
         }
         return null;
     }

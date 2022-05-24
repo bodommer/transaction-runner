@@ -71,10 +71,10 @@ public class LockManager {
     }
 
     public void releaseAllLocks(ITransaction transaction) {
-        exclusiveLocks.replaceAll(tr -> tr.equals(transaction) ? null : tr);
+        exclusiveLocks.replaceAll(tr -> tr != null && tr.equals(transaction) ? null : tr);
         sharedLocks.forEach(li -> li.remove(transaction));
-    } 
-    
+    }
+
     public boolean canWrite(int index, ITransaction transaction) {
         return !outOfRange(index) && exclusiveLocks.get(index) == transaction;
     }
@@ -83,6 +83,21 @@ public class LockManager {
         return !outOfRange(index) && sharedLocks.get(index).contains(transaction);
     }
 
+    public List<ITransaction> getExclusives() {
+        return new ArrayList<>(exclusiveLocks);
+    }
+    
+    public List<List<ITransaction>> getShared() {
+        return sharedLocks.stream().map(ArrayList::new).collect(Collectors.toList());
+    }
+    
+    public void restore(List<ITransaction> exclusive, List<List<ITransaction>> shared) {
+        sharedLocks.clear();
+        shared.forEach(element -> sharedLocks.add(new ArrayList<>(element)));
+        exclusiveLocks.clear();
+        exclusiveLocks.addAll(exclusive);
+    }
+    
     @Override
     public String toString() {
         StringBuilder stringBuilder = new StringBuilder();

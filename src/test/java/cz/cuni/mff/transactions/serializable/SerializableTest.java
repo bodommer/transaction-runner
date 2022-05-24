@@ -1,7 +1,8 @@
 package cz.cuni.mff.transactions.serializable;
 
-import cz.cuni.mff.transactions.datamodel.manager.LogManager;
 import cz.cuni.mff.transactions.datamodel.TransactionAction;
+import cz.cuni.mff.transactions.datamodel.structure.HistoryEvent;
+import cz.cuni.mff.transactions.datamodel.structure.LogFlush;
 import cz.cuni.mff.transactions.transaction.Transaction;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -93,7 +94,7 @@ class SerializableTest {
     //formatter:on
     void serializableTest(String fileName, int transactionCount, boolean expected) throws IOException {
         // prepare
-        LogManager history = new LogManager();
+        LogFlush logFlush = new LogFlush();
 
         List<Transaction> transactions = new ArrayList<>();
         for (int i = 1; i < transactionCount + 1; i++) {
@@ -121,13 +122,13 @@ class SerializableTest {
                         action = TransactionAction.COMMIT;
                 }
                 int index = Integer.parseInt(elements[2]);
-                history.addEvent(transaction, action, index);
+                logFlush.flush(new HistoryEvent(action, index, transaction, 0, 1, null));
             }
         }
 
         // act
-        boolean isSerializable = history.isSerializable();
-        history.printHistoryInLanes();
+        boolean isSerializable = logFlush.isSerializable();
+        //logFlush.printHistoryInLanes();
 
         //assert
         assertEquals(expected, isSerializable);

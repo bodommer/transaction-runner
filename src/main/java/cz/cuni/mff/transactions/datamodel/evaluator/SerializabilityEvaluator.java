@@ -26,7 +26,6 @@ public class SerializabilityEvaluator {
         ConflictType[][] incidenceMatrix = detectConflicts(transactions, events, transactionMap);
 
         // 4. Start in all nodes
-        // TODO: improve for large graphs
         List<Integer> rowIndexes = transactions.stream().map(tr -> tr.getId() - 1).collect(Collectors.toList());
 
         // 5. Check for inner loops

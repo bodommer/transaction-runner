@@ -44,4 +44,9 @@ public class HistoryEvent {
     public HistoryEvent getPreviousEvent() {
         return previousEvent;
     }
+    
+    @Override
+    public String toString() {
+        return transaction.toString() + ": " + action.toString() + "[" + index + "]: " + oldValue + " -> " + newValue; 
+    }
 }

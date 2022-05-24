@@ -3,25 +3,32 @@ package cz.cuni.mff.transactions.datamodel.manager;
 import cz.cuni.mff.transactions.transaction.ITransaction;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class DeadlockManager {
 
-    private final Map<ITransaction, List<ITransaction>> deadlockEdges = new HashMap<>();
-    
-    public void addEdges(ITransaction waitingTransaction, List<ITransaction> waitingFor) {
-        // add new edges or create a new K-V pair
+    private final Map<ITransaction, Integer> lockedTransactions = new HashMap<>();
+
+    public boolean watchTransaction(ITransaction transaction) {
+        if (!lockedTransactions.containsKey(transaction)) {
+            lockedTransactions.put(transaction, 1);
+            return false;
+        } else {
+            lockedTransactions.put(transaction, lockedTransactions.get(transaction) + 1);
+        }
+        return lockedTransactions.get(transaction) > 99;
     }
     
-    public ITransaction detectCycle(ITransaction startingTransaction) {
-        // run DFS, detect first cycle and determine the 'youngest' transaction to kill
-        // should be run until returns null (no cycle)
-        return null;
+    public void unwatchTransaction(ITransaction transaction) {
+        lockedTransactions.remove(transaction);
     }
     
-    public void removeTransaction(ITransaction transaction) {
-        // remove the transaction from keys and value lists
+    public Map<ITransaction, Integer> getLockedTransactions() {
+        return new HashMap<>(lockedTransactions);    
+    }
+    
+    public void reset(Map<ITransaction, Integer> map) {
+        lockedTransactions.putAll(map);
     }
     
 }

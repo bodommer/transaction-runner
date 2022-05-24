@@ -11,7 +11,7 @@ public class Transaction implements ITransaction {
     private final List<Integer> actionIndex;
     private int currentIndex = 0;
 
-    protected Transaction(String name, List<TransactionAction> actions, List<Integer> actionIndex) {
+    public Transaction(String name, List<TransactionAction> actions, List<Integer> actionIndex) {
         this.name = name;
         this.actions = actions;
         this.actionIndex = actionIndex;

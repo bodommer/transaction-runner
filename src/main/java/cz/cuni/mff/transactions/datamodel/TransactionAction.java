@@ -5,5 +5,9 @@ public enum TransactionAction {
     WRITE,
     COMMIT,
     ABORT,
+    /**
+     * An auxiliary value for cache when performing ABORT correctly. Never flushed into log.
+     */
+    FETCH,
     NOP
 }

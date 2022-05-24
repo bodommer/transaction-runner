@@ -3,7 +3,6 @@ package cz.cuni.mff.transactions.datamodel.structure;
 import cz.cuni.mff.transactions.datamodel.TransactionAction;
 import cz.cuni.mff.transactions.datamodel.evaluator.RecoverabilityEvaluator;
 import cz.cuni.mff.transactions.datamodel.evaluator.SerializabilityEvaluator;
-import cz.cuni.mff.transactions.datamodel.structure.HistoryEvent;
 import cz.cuni.mff.transactions.transaction.ITransaction;
 
 import java.util.ArrayList;
@@ -19,7 +18,7 @@ public class LogFlush {
     public void flush(List<HistoryEvent> events) {
         events.forEach(this::flush);
     }
-    
+
     public void flush(HistoryEvent event) {
         log.add(event);
         transactions.add(event.getTransaction());
@@ -38,6 +37,10 @@ public class LogFlush {
             System.out.println(event.getTransaction().toString().substring(2) + " " + getActionCode(event.getAction())
                     + " " + event.getIndex());
         }
+    }
+
+    public List<HistoryEvent> getLog() {
+        return log;
     }
 
     public void printHistoryInLanes() {

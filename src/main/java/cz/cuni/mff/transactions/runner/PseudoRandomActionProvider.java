@@ -9,7 +9,7 @@ public class PseudoRandomActionProvider extends AbstractActionProvider {
 
     private final Random random;
     
-    protected PseudoRandomActionProvider(List<ITransaction> transactions, int seed) {
+    public PseudoRandomActionProvider(List<ITransaction> transactions, int seed) {
         super(transactions);
         this.random = new Random(seed);
     }
